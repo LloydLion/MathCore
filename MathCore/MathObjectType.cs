@@ -1,11 +1,11 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Text;
 
 namespace MathCore
 {
-	public abstract class MathObjectType
+	public class MathObjectType
 	{
-		public abstract object GetDefaultInterface();
 
-		public abstract OperationFactory[] GetDefaultOperations();
 	}
 }
