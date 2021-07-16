@@ -36,7 +36,7 @@ namespace MathCore
 
 		private Vector Scale(double scalar, bool isInt)
 		{
-			return new Vector(Cords.Select(s => s * scalar).ToArray(), isInt);
+			return new Vector(Cords.Select(s => s * scalar).ToArray(), isInt && IsInt);
 		}
 
 		public double DotProduct(Vector vector)
@@ -80,6 +80,36 @@ namespace MathCore
 		public double ColliniarDegree(Vector vector)
 		{
 			return Normalize().DotProduct(vector.Normalize());
+		}
+
+		public Vector Extend(int up, int down)
+		{
+			List<double> cords = new List<double>();
+			cords.AddRange(Cords);
+
+			if (down >= 0) cords.AddRange(new double[down]);
+			else cords.RemoveRange(cords.Count - 1 + down, -down);
+
+			if (up >= 0) cords.InsertRange(0, new double[up]);
+			else cords.RemoveRange(0, -up);
+
+			return new Vector(cords, IsInt);
+		}
+
+		public override string ToString()
+		{
+			return "[" + base.ToString() + "]";
+		}
+
+
+		public static Vector Basis(int dims, int axis)
+		{
+			return new Vector(1).Extend(axis - 1, dims - axis);
+		}
+
+		public static Vector Zero(int dims)
+		{
+			return new Vector(dims, true);
 		}
 	}
 }

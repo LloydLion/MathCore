@@ -10,6 +10,35 @@ namespace MathCore
 		private double[] cords;
 
 
+		public CordBase(int dimensions, bool isInt)
+		{
+			cords = new double[dimensions];
+			IsInt = isInt;
+		}
+
+		public CordBase(IReadOnlyList<int> ints)
+		{
+			cords = ints.Select(s => (double)s).ToArray();
+			IsInt = true;
+		}
+
+		public CordBase(IReadOnlyList<double> cords)
+		{
+			this.cords = cords.ToArray();
+			IsInt = false;
+		}
+
+		public CordBase(IReadOnlyList<double> cords, bool isInt)
+		{
+			this.cords = cords.Select(s => Math.Floor(s)).ToArray();
+			IsInt = isInt;
+		}
+
+		public CordBase(params int[] cords) : this((IReadOnlyList<int>)cords) { }
+
+		public CordBase(params double[] cords) : this((IReadOnlyList<double>)cords) { }
+
+
 		public IReadOnlyList<double> Cords => cords;
 
 		public int Dimensions => cords.Length;
@@ -42,17 +71,6 @@ namespace MathCore
 					($"Vector mus{add}t be Integer to do this operation. Check IsInt property");
 		}
 
-		public void DisableInt()
-		{
-			IsInt = false;
-		}
-
-		public void RoundCords()
-		{
-			cords = cords.Select(s => Math.Floor(s)).ToArray();
-			IsInt = true;
-		}
-
 		protected static IReadOnlyList<double> Sum(CordBase cord1, CordBase cord2, out bool isInt)
 		{
 			if (cord1.Dimensions != cord2.Dimensions)
@@ -69,33 +87,19 @@ namespace MathCore
 			return Clone();
 		}
 
-
-		public CordBase(int dimensions, bool isInt)
+		public override string ToString()
 		{
-			cords = new double[dimensions];
-			IsInt = isInt;
+			return string.Join(", ", cords);
 		}
 
-		public CordBase(IReadOnlyList<int> ints)
+		public override bool Equals(object obj)
 		{
-			cords = ints.Select(s => (double)s).ToArray();
-			IsInt = true;
+			return obj is CordBase cord && cord.Cords.SequenceEqual(Cords);
 		}
 
-		public CordBase(IReadOnlyList<double> cords)
+		public override int GetHashCode()
 		{
-			this.cords = cords.ToArray();
-			IsInt = false;
+			return Cords.GetHashCode();
 		}
-
-		public CordBase(IReadOnlyList<double> cords, bool isInt)
-		{
-			this.cords = cords.Select(s => Math.Floor(s)).ToArray();
-			IsInt = isInt;
-		}
-
-		public CordBase(params int[] cords) : this((IReadOnlyList<int>)cords) { }
-
-		public CordBase(params double[] cords) : this((IReadOnlyList<double>)cords) { }
 	}
 }

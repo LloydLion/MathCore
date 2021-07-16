@@ -38,5 +38,10 @@ namespace MathCore
 				return ret;
 			}).ToArray(), IsInt);
 		}
+
+		public override string ToString()
+		{
+			return "(" + base.ToString() + ")";
+		}
 	}
 }
