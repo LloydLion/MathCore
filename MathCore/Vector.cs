@@ -88,7 +88,7 @@ namespace MathCore
 			cords.AddRange(Cords);
 
 			if (down >= 0) cords.AddRange(new double[down]);
-			else cords.RemoveRange(cords.Count - 1 + down, -down);
+			else cords.RemoveRange(cords.Count + down, -down);
 
 			if (up >= 0) cords.InsertRange(0, new double[up]);
 			else cords.RemoveRange(0, -up);

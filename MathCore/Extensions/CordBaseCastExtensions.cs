@@ -6,14 +6,14 @@ namespace MathCore.Extensions
 {
 	public static class CordBaseCastExtensions
 	{
-		public static Vector ToVector(this Point point)
+		public static Vector ToVector(this CordBase cords)
 		{
-			return new Vector(point.Cords, point.IsInt);
+			return new Vector(cords.Cords, cords.IsInt);
 		}
 
-		public static Point ToPoint(this Vector vector)
+		public static Point ToPoint(this CordBase cords)
 		{
-			return new Point(vector.Cords, vector.IsInt);
+			return new Point(cords.Cords, cords.IsInt);
 		}
 	}
 }

@@ -30,7 +30,7 @@ namespace MathCore
 
 		public CordBase(IReadOnlyList<double> cords, bool isInt)
 		{
-			this.cords = cords.Select(s => Math.Floor(s)).ToArray();
+			this.cords = cords.Select(s => isInt ? Math.Floor(s) : s).ToArray();
 			IsInt = isInt;
 		}
 
@@ -67,7 +67,7 @@ namespace MathCore
 		protected void ThrowIfNotInt(bool inverse = false)
 		{
 			string add = inverse ? "n'" : "";
-			if (IsInt != inverse) throw new InvalidOperationException
+			if (IsInt == inverse) throw new InvalidOperationException
 					($"Vector mus{add}t be Integer to do this operation. Check IsInt property");
 		}
 
