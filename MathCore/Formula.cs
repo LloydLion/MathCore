@@ -61,6 +61,12 @@ namespace MathCore
 				if (val == 0)
 					return false;
 
+			if (var.Constrains.HasFlag(NumberConstrain.Even)) //integer has checked
+				if (val % 2 == 1) return false;
+
+			if (var.Constrains.HasFlag(NumberConstrain.Odd)) //integer has checked
+				if (val % 2 == 0) return false;
+
 			return true;
 		}
 
@@ -69,6 +75,8 @@ namespace MathCore
 		{
 			None		= 0b0000_0000,
 			Integer		= 0b1000_0000,
+			Even		= 0b1001_0000,
+			Odd			= 0b1000_1000,
 			NoNegative	= 0b0100_0000,
 			NoZero		= 0b0010_0000,
 
