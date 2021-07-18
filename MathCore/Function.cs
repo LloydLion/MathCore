@@ -30,24 +30,24 @@ namespace MathCore
 				throw new ArgumentException("Args count isn't equals exepted Inputs count", nameof(args));
 
 			for (int i = 0; i < args.Count; i++)
-				if (InputTypes[i].IsAssignableFrom(args[i].GetType()))
+				if (!InputTypes[i].IsAssignableFrom(args[i].GetType()))
 					throw new ArgumentException($"Argument at {i} index has unexepted type");
 
 			OnInvoking(args);
 			var ret = @delegate(args);
 
-			for (int i = 0; i < ret.Count; i++)
-				if (OutputTypes[i].IsAssignableFrom(ret[i].GetType()))
-					throw new Exception($"Invalid function delegate. Result at {i} index has unexepted type");
-
 			if (ret.Count != OutputTypes.Count)
 				throw new Exception("Invalid function delegate. Count of given results isn't equals exepted Outputs count");
+
+			for (int i = 0; i < ret.Count; i++)
+				if (!OutputTypes[i].IsAssignableFrom(ret[i].GetType()))
+					throw new Exception($"Invalid function delegate. Result at {i} index has unexepted type");
 
 			OnInvoked(args, ret);
 			return ret;
 		}
 
-		public IReadOnlyList<object> Invoke(params object[] args) => Invoke(args);
+		public IReadOnlyList<object> Invoke(params object[] args) => Invoke((IReadOnlyList<object>)args);
 
 		public object InvokeSingle(params object[] args) => Invoke(args).Single();
 
