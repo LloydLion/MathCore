@@ -70,7 +70,7 @@ namespace MathCore
 				for (int i = 0; i < right; i++)
 					basises.Add(useZero ? Vector.Zero(outDims) : Vector.Basis(outDims, i));
 			else
-				basises.RemoveRange(basises.Count - 1 + right, right);
+				basises.RemoveRange(basises.Count + right, -right);
 
 			return new Matrix(basises);
 		}

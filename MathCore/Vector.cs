@@ -104,7 +104,7 @@ namespace MathCore
 
 		public static Vector Basis(int dims, int axis)
 		{
-			return new Vector(1).Extend(axis - 1, dims - axis);
+			return new Vector(1).Extend(axis, dims - axis - 1);
 		}
 
 		public static Vector Zero(int dims)
