@@ -14,9 +14,9 @@ namespace MathCore
 
 
 		public Formula(IReadOnlyCollection<Variable> variables, Func<IReadOnlyDictionary<string, double>, double> @delegate)
-			: base(new byte[variables.Count].Select(s => typeof(KeyValuePair<string, double>)).ToArray(),
+			: base(new Type[] { typeof(IReadOnlyDictionary<string, double>) },
 				  new Type[] { typeof(double) },  (s) => new object[] {
-				  @delegate(((IReadOnlyDictionary<string, double>)s).ToDictionary(m => m.Key, m => m.Value)) })
+				  @delegate((IReadOnlyDictionary<string, double>)s[0]) })
 		{
 			this.variables = variables;
 		}
@@ -24,13 +24,9 @@ namespace MathCore
 
 		protected override void OnInvoking(IReadOnlyList<object> args)
 		{
-			var a = (IReadOnlyDictionary<string, double>)args;
-			foreach (var item in a)
-			{
-				var var = variables.Single(s => s.Name == item.Key);
-				if(!CheckConstrains(var, item.Value))
-					throw new ArgumentException("One or more variables has invalid value");
-			}
+			var a = (IReadOnlyDictionary<string, double>)args[0];
+			if(!IsOkArgs(a))
+				throw new ArgumentException("One or more variables has invalid value");
 		}
 
 		public bool IsOkArgs(IReadOnlyDictionary<string, double> args)
@@ -44,8 +40,8 @@ namespace MathCore
 			return true;
 		}
 
-		public double Invoke(IReadOnlyDictionary<string, double> args) =>
-			(double)Invoke(args.ToList()).Single();
+		public double CalculateFormula(IReadOnlyDictionary<string, double> args) =>
+			(double)InvokeSingle(args);
 
 		private bool CheckConstrains(Variable var, double val)
 		{
@@ -70,19 +66,6 @@ namespace MathCore
 			return true;
 		}
 
-
-		public enum NumberConstrain
-		{
-			None		= 0b0000_0000,
-			Integer		= 0b1000_0000,
-			Even		= 0b1001_0000,
-			Odd			= 0b1000_1000,
-			NoNegative	= 0b0100_0000,
-			NoZero		= 0b0010_0000,
-
-			//Auto implements
-			Positive	= 0b0110_0000
-		}
 
 		public struct Variable
 		{
