@@ -17,7 +17,7 @@ namespace MathCore
 			this.@delegate = @delegate;
 		}
 
-		public Point Invoke(Point point)
+		public Point Calculate(Point point)
 		{
 			return @delegate(point);
 		}
