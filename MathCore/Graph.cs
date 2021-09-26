@@ -9,37 +9,36 @@ namespace MathCore
 {
 	public class Graph
 	{
-		public Predicate<GraphPoint> PointSelector { get; }
-
-		public double SampleCount { get; }
+		public Predicate<Point> PointSelector { get; }
 
 
-		public Graph(Predicate<GraphPoint> pointSelector, double sampleCount)
+		public Graph(Predicate<Point> pointSelector)
 		{
 			PointSelector = pointSelector;
-			SampleCount = sampleCount;
 		}
 
 
-		public Task<GraphResolver> Build3D(GraphArea graphArea, IProgress<double> progress)
+		public Task<Resolver> Build3D(Area graphArea, int sampleCount, IProgress<double> progress)
 		{
 			return Task.Run(() =>
 			{
-				var xScale = graphArea.EndPoint.X - graphArea.StartPoint.X;
-				var yScale = graphArea.EndPoint.Y - graphArea.StartPoint.Y;
-				var zScale = graphArea.EndPoint.Z - graphArea.StartPoint.Z;
+				var xScale = graphArea.EndPoint.X - graphArea.StartPoint.X; xScale = xScale == 0 ? 1 : xScale;
+				var yScale = graphArea.EndPoint.Y - graphArea.StartPoint.Y; yScale = yScale == 0 ? 1 : yScale;
+				var zScale = graphArea.EndPoint.Z - graphArea.StartPoint.Z; zScale = zScale == 0 ? 1 : zScale;
 
-				var list = new List<GraphPoint>();
+				var list = new List<Point>();
 
-				var totalCycles = Math.Pow(SampleCount, 3);
+				var totalCycles = xScale * yScale * zScale * Math.Pow(sampleCount, 3);
 				var currentIterations = 0;
 				progress.Report(currentIterations);
 
-				for (double x = graphArea.StartPoint.X; x < graphArea.EndPoint.X; x += 1 / (double)SampleCount * xScale)
-					for (double y = graphArea.StartPoint.Y; y < graphArea.StartPoint.Y; y += 1 / (double)SampleCount * yScale)
-						for (double z = graphArea.StartPoint.Z; z < graphArea.StartPoint.Z; z += 1 / (double)SampleCount * zScale)
+				for (double x = graphArea.StartPoint.X; x <= graphArea.EndPoint.X; x += 1 / (double)sampleCount)
+				{
+					for (double y = graphArea.StartPoint.Y; y <= graphArea.EndPoint.Y; y += 1 / (double)sampleCount)
+					{
+						for (double z = graphArea.StartPoint.Z; z <= graphArea.StartPoint.Z; z += 1 / (double)sampleCount)
 						{
-							var point = new GraphPoint() { X = x, Y = y, Z = z };
+							var point = new Point() { X = x, Y = y, Z = z };
 
 							if (PointSelector.Invoke(point))
 							{
@@ -47,27 +46,34 @@ namespace MathCore
 							}
 
 							currentIterations++;
-							progress.Report(currentIterations);
+							progress.Report(currentIterations / totalCycles * 100);
 						}
+					}
+				}
 
-				return new GraphResolver(list);
+				progress.Report(100);
+
+				return new Resolver(list);
 			});
 		}
 
-		public Task<GraphResolver> Build2D(GraphArea graphArea, IProgress<double> progress)
+		public Task<Resolver> Build2D(Area graphArea, int sampleCount, IProgress<double> progress)
 		{
-			var start = graphArea.StartPoint; var end = graphArea.EndPoint;
+			var start = graphArea.StartPoint;
+			var end = graphArea.EndPoint;
+
 			start.Z = end.Z = 0;
+
 			graphArea.StartPoint = start;
 			graphArea.EndPoint = end;
 
-			return Build3D(graphArea, progress);
+			return Build3D(graphArea, sampleCount, progress);
 		}
 
 
-		public struct GraphPoint
+		public struct Point
 		{
-			public GraphPoint(double x, double y, double z)
+			public Point(double x, double y, double z)
 			{
 				X = x;
 				Y = y;
@@ -82,19 +88,19 @@ namespace MathCore
 			public double Z { get; set; }
 		}
 
-		public struct GraphArea
+		public struct Area
 		{
-			public GraphPoint StartPoint { get; set; }
+			public Point StartPoint { get; set; }
 
-			public GraphPoint EndPoint { get; set; }
+			public Point EndPoint { get; set; }
 		}
 
-		public class GraphResolver : IEnumerable<GraphPoint>
+		public class Resolver : IEnumerable<Point>
 		{
-			private readonly IReadOnlyList<GraphPoint> graphPoints;
+			private readonly IReadOnlyList<Point> graphPoints;
 
 
-			public GraphResolver(IReadOnlyList<GraphPoint> graphPoints)
+			public Resolver(IReadOnlyList<Point> graphPoints)
 			{
 				this.graphPoints = graphPoints;
 			}
@@ -102,40 +108,40 @@ namespace MathCore
 
 			public bool HasPointAt(double x, double y, double z = 0)
 			{
-				return graphPoints.Contains(new GraphPoint(x, y, z));
+				return graphPoints.Contains(new Point(x, y, z));
 			}
 
-			public GraphResolver GetPointsOnXLine(double y, double z = 0)
-			{ 
-				return new GraphResolver(graphPoints.Where(s => s.Y == y && s.Z == z).ToList());
-			}
-
-			public GraphResolver GetPointsOnYLine(double x, double z = 0)
+			public Resolver GetPointsOnXLine(double y, double z = 0)
 			{
-				return new GraphResolver(graphPoints.Where(s => s.X == x && s.Z == z).ToList());
+				return new Resolver(graphPoints.Where(s => s.Y == y && s.Z == z).ToList());
 			}
 
-			public GraphResolver GetPointsOnZLine(double x, double y)
+			public Resolver GetPointsOnYLine(double x, double z = 0)
 			{
-				return new GraphResolver(graphPoints.Where(s => s.X == x && s.Y == y).ToList());
+				return new Resolver(graphPoints.Where(s => s.X == x && s.Z == z).ToList());
 			}
 
-			public GraphResolver GetPointsOnXYPlane(double z)
+			public Resolver GetPointsOnZLine(double x, double y)
 			{
-				return new GraphResolver(graphPoints.Where(s => s.Z == z).ToList());
+				return new Resolver(graphPoints.Where(s => s.X == x && s.Y == y).ToList());
 			}
 
-			public GraphResolver GetPointsOnXZPlane(double y)
+			public Resolver GetPointsOnXYPlane(double z)
 			{
-				return new GraphResolver(graphPoints.Where(s => s.Y == y).ToList());
+				return new Resolver(graphPoints.Where(s => s.Z == z).ToList());
 			}
 
-			public GraphResolver GetPointsOnYZPlane(double x)
+			public Resolver GetPointsOnXZPlane(double y)
 			{
-				return new GraphResolver(graphPoints.Where(s => s.X == x).ToList());
+				return new Resolver(graphPoints.Where(s => s.Y == y).ToList());
 			}
 
-			public IEnumerator<GraphPoint> GetEnumerator()
+			public Resolver GetPointsOnYZPlane(double x)
+			{
+				return new Resolver(graphPoints.Where(s => s.X == x).ToList());
+			}
+
+			public IEnumerator<Point> GetEnumerator()
 			{
 				return graphPoints.GetEnumerator();
 			}

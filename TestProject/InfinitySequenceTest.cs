@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 namespace TestProject
 {
 	[TestClass]
-	public class InfinitySequence
+	public class InfinitySequenceTest
 	{
 		[TestMethod]
 		public void BasicTest()
